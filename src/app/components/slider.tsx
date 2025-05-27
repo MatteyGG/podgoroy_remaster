@@ -1,9 +1,10 @@
 "use client"
-import React, { useCallback } from 'react'
+import { useCallback } from 'react'
+import React, { ReactNode } from "react";
 import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
 
-export default function Slider() {
+export default function Slider({ children }: { children: ReactNode }) {
     const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay({
         delay: 6000,
     })])
@@ -15,9 +16,7 @@ export default function Slider() {
     <div className="embla">
       <div className="embla__viewport" ref={emblaRef}>
         <div className="embla__container">
-          <div className="embla__slide">Slide 1</div>
-          <div className="embla__slide">Slide 2</div>
-          <div className="embla__slide">Slide 3</div>
+          {children}
         </div>
       </div>
       <button className="embla__prev" onClick={scrollPrev}>
@@ -27,6 +26,6 @@ export default function Slider() {
         Next
       </button>
     </div>
-
     )
 }
+

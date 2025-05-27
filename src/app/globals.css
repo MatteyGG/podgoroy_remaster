@@ -30,3 +30,10 @@ body {
 .embla__slide {  flex: 0 0 100%;  min-width: 0;}
 .embla__viewport {  overflow: hidden;  cursor: move;  cursor: grab;}
 .embla__viewport:active {  cursor: grabbing;}
+
+.slider_image { @apply object-contain h-auto max-w-full
+}
+
+.first_latter::first-letter {
+  @apply uppercase tracking-widest text-7xl font-bold  float-start
+}

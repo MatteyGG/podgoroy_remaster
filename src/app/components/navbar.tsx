@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export default function Navbar() {
     return (<>
-        <nav>
+        <nav className="bg-white border-gray-200 px-2 sm:px-4 py-2.5 rounded dark:bg-gray-950">
             <div className="flex flex-wrap justify-between mx-auto max-w-screen-xl pt-4">
                 <Link href="/">
                     <span className="self-center text-2xl md:text-3xl font-semibold">
@@ -46,7 +46,7 @@ export default function Navbar() {
                 </div>
             </div>
         </nav>
-        <nav>
+        <nav className="bg-white border-gray-200 px-2 sm:px-4 rounded dark:bg-gray-950">
             <div className="max-w-screen-xl py-3">
                 <div className="flex items-center">
                     <ul className="flex flex-row font-medium text-sm lg:text-xl gap-3 mt-0">
