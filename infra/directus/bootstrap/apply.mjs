@@ -84,6 +84,43 @@ async function fieldExists(token, collection, field) {
   return response.ok;
 }
 
+async function relationExists(token, manyCollection, manyField) {
+  const response = await request(
+    "GET",
+    `/relations?filter[many_collection][_eq]=${encodeURIComponent(
+      manyCollection,
+    )}&filter[many_field][_eq]=${encodeURIComponent(manyField)}&limit=1`,
+    undefined,
+    token,
+  );
+  return (response.data?.length ?? 0) > 0;
+}
+
+async function ensureRelation(token, payload) {
+  const exists = await relationExists(
+    token,
+    payload.collection_many,
+    payload.field_many,
+  );
+  if (exists) {
+    console.log(
+      `Relation '${payload.collection_many}.${payload.field_many}' already exists.`,
+    );
+    return;
+  }
+
+  try {
+    await request("POST", "/relations", payload, token);
+    console.log(
+      `Relation '${payload.collection_many}.${payload.field_many}' created.`,
+    );
+  } catch (error) {
+    console.warn(
+      `Skipping relation '${payload.collection_many}.${payload.field_many}': ${error.message}`,
+    );
+  }
+}
+
 async function ensureField(token, collection, payload) {
   const exists = await fieldExists(token, collection, payload.field);
   if (exists) {
@@ -266,6 +303,48 @@ async function ensurePereslavlCardsFields(token) {
   });
 
   await ensureField(token, "pereslavl_cards", {
+    field: "image_1",
+    type: "uuid",
+    meta: {
+      interface: "file-image",
+      width: "third",
+      sort: 6,
+      note: "Primary image from File Library.",
+    },
+    schema: {
+      is_nullable: true,
+    },
+  });
+
+  await ensureField(token, "pereslavl_cards", {
+    field: "image_2",
+    type: "uuid",
+    meta: {
+      interface: "file-image",
+      width: "third",
+      sort: 7,
+      note: "Secondary image from File Library.",
+    },
+    schema: {
+      is_nullable: true,
+    },
+  });
+
+  await ensureField(token, "pereslavl_cards", {
+    field: "image_3",
+    type: "uuid",
+    meta: {
+      interface: "file-image",
+      width: "third",
+      sort: 8,
+      note: "Third image from File Library.",
+    },
+    schema: {
+      is_nullable: true,
+    },
+  });
+
+  await ensureField(token, "pereslavl_cards", {
     field: "images_json",
     type: "json",
     meta: {
@@ -275,8 +354,8 @@ async function ensurePereslavlCardsFields(token) {
         template: "[]",
       },
       width: "full",
-      sort: 6,
-      note: "Array of image URLs or /assets/<file_id> links.",
+      sort: 9,
+      note: "Legacy fallback image array. Can stay empty.",
     },
     schema: {
       is_nullable: true,
@@ -289,12 +368,36 @@ async function ensurePereslavlCardsFields(token) {
     meta: {
       interface: "input",
       width: "half",
-      sort: 7,
+      sort: 10,
       note: "Card order. Chess layout is derived from this order.",
     },
     schema: {
       is_nullable: true,
     },
+  });
+
+  await ensureRelation(token, {
+    collection_many: "pereslavl_cards",
+    field_many: "image_1",
+    collection_one: "directus_files",
+    field_one: null,
+    junction_field: null,
+  });
+
+  await ensureRelation(token, {
+    collection_many: "pereslavl_cards",
+    field_many: "image_2",
+    collection_one: "directus_files",
+    field_one: null,
+    junction_field: null,
+  });
+
+  await ensureRelation(token, {
+    collection_many: "pereslavl_cards",
+    field_many: "image_3",
+    collection_one: "directus_files",
+    field_one: null,
+    junction_field: null,
   });
 }
 

@@ -13,9 +13,29 @@ type DirectusCardItem = {
   title?: string;
   body_text?: string;
   tags_text?: string;
+  image_1?: unknown;
+  image_2?: unknown;
+  image_3?: unknown;
   images_json?: unknown;
   sort?: number;
 };
+
+function extractFileId(value: unknown): string | null {
+  if (typeof value === "string" && value.trim().length > 0) {
+    return value.trim();
+  }
+  if (value && typeof value === "object") {
+    const id = (value as { id?: unknown }).id;
+    if (typeof id === "string" && id.trim().length > 0) {
+      return id.trim();
+    }
+  }
+  return null;
+}
+
+function toAssetUrl(fileId: string, directusPublicUrl: string): string {
+  return `${directusPublicUrl.replace(/\/+$/, "")}/assets/${fileId}`;
+}
 
 function normalizeContent(raw: unknown): PereslavlPageContent | null {
   if (!raw || typeof raw !== "object") return null;
@@ -32,7 +52,10 @@ function normalizeContent(raw: unknown): PereslavlPageContent | null {
   return value as PereslavlPageContent;
 }
 
-function normalizeCards(raw: unknown): PereslavlPageContent["sections"] | null {
+function normalizeCards(
+  raw: unknown,
+  directusPublicUrl: string | null,
+): PereslavlPageContent["sections"] | null {
   if (!Array.isArray(raw)) return null;
 
   const sections = raw
@@ -46,9 +69,17 @@ function normalizeCards(raw: unknown): PereslavlPageContent["sections"] | null {
         .split(/\n|,/g)
         .map((line) => line.trim())
         .filter(Boolean);
-      const images = Array.isArray(card.images_json)
+      const imageIds = [card.image_1, card.image_2, card.image_3]
+        .map(extractFileId)
+        .filter(Boolean) as string[];
+      const fileImages =
+        directusPublicUrl && imageIds.length > 0
+          ? imageIds.map((id) => toAssetUrl(id, directusPublicUrl))
+          : [];
+      const legacyImages = Array.isArray(card.images_json)
         ? (card.images_json as string[])
         : [];
+      const images = [...fileImages, ...legacyImages].filter(Boolean);
 
       if (!card.title) return null;
 
@@ -67,6 +98,7 @@ function normalizeCards(raw: unknown): PereslavlPageContent["sections"] | null {
 
 export async function getPereslavlContent(): Promise<PereslavlContentResponse> {
   const url = process.env.DIRECTUS_INTERNAL_URL ?? process.env.NEXT_PUBLIC_DIRECTUS_URL;
+  const publicUrl = process.env.NEXT_PUBLIC_DIRECTUS_URL ?? null;
   const token = process.env.DIRECTUS_STATIC_TOKEN;
 
   if (!url || !token) {
@@ -82,7 +114,7 @@ export async function getPereslavlContent(): Promise<PereslavlContentResponse> {
     const cardsEndpoint =
       `${url.replace(/\/+$/, "")}/items/pereslavl_cards` +
       "?filter[page_slug][_eq]=pereslavl&sort=sort" +
-      "&fields=section_id,title,body_text,tags_text,images_json,sort";
+      "&fields=section_id,title,body_text,tags_text,image_1,image_2,image_3,images_json,sort";
 
     const [pageResponse, cardsResponse] = await Promise.all([
       fetch(pageEndpoint, {
@@ -115,7 +147,7 @@ export async function getPereslavlContent(): Promise<PereslavlContentResponse> {
       const cardsPayload = (await cardsResponse.json()) as {
         data?: unknown[];
       };
-      const sections = normalizeCards(cardsPayload.data);
+      const sections = normalizeCards(cardsPayload.data, publicUrl);
       if (sections) {
         return {
           source: "directus",
