@@ -84,6 +84,22 @@ async function fieldExists(token, collection, field) {
   return response.ok;
 }
 
+async function getField(token, collection, field) {
+  const response = await fetch(`${DIRECTUS_URL}/fields/${collection}/${field}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) return null;
+  const payload = await response.json();
+  return payload.data ?? null;
+}
+
+async function deleteFieldIfExists(token, collection, field) {
+  const exists = await fieldExists(token, collection, field);
+  if (!exists) return;
+  await request("DELETE", `/fields/${collection}/${field}`, undefined, token);
+  console.log(`Field '${collection}.${field}' deleted.`);
+}
+
 async function ensureField(token, collection, payload) {
   const exists = await fieldExists(token, collection, payload.field);
   if (exists) {
@@ -107,6 +123,24 @@ async function patchFieldMetaIfExists(token, collection, field, metaPatch) {
     token,
   );
   console.log(`Field '${collection}.${field}' metadata updated.`);
+}
+
+async function relationExists(token, collection, field) {
+  const response = await fetch(`${DIRECTUS_URL}/relations/${collection}/${field}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.ok;
+}
+
+async function ensureRelation(token, payload) {
+  const exists = await relationExists(token, payload.collection, payload.field);
+  if (exists) {
+    console.log(`Relation '${payload.collection}.${payload.field}' already exists.`);
+    return;
+  }
+
+  await request("POST", "/relations", payload, token);
+  console.log(`Relation '${payload.collection}.${payload.field}' created.`);
 }
 
 async function ensurePagesFields(token) {
@@ -204,6 +238,101 @@ async function ensurePagesFields(token) {
   });
 }
 
+async function ensurePereslavlCardFilesRelation(token) {
+  await ensureCollection(token, "pereslavl_cards_files", {
+    icon: "perm_media",
+    hidden: true,
+    note: "Junction collection for pereslavl card images.",
+  });
+
+  await ensureField(token, "pereslavl_cards_files", {
+    field: "pereslavl_cards_id",
+    type: "integer",
+    meta: {
+      interface: "select-dropdown-m2o",
+      width: "half",
+      sort: 1,
+    },
+    schema: {
+      is_nullable: true,
+    },
+  });
+
+  await ensureField(token, "pereslavl_cards_files", {
+    field: "directus_files_id",
+    type: "uuid",
+    meta: {
+      interface: "file",
+      width: "half",
+      sort: 2,
+    },
+    schema: {
+      is_nullable: true,
+    },
+  });
+
+  await ensureField(token, "pereslavl_cards_files", {
+    field: "sort",
+    type: "integer",
+    meta: {
+      interface: "input",
+      width: "full",
+      sort: 3,
+    },
+    schema: {
+      is_nullable: true,
+    },
+  });
+
+  const imagesFilesField = await getField(token, "pereslavl_cards", "images_files");
+  if (imagesFilesField && imagesFilesField.type !== "alias") {
+    await deleteFieldIfExists(token, "pereslavl_cards", "images_files");
+  }
+
+  await ensureField(token, "pereslavl_cards", {
+    field: "images_files",
+    type: "alias",
+    meta: {
+      special: ["m2m"],
+      interface: "files",
+      width: "full",
+      sort: 6,
+      note: "Main image set. Supports multiple files from File Library.",
+    },
+    schema: null,
+  });
+
+  await ensureRelation(token, {
+    collection: "pereslavl_cards_files",
+    field: "pereslavl_cards_id",
+    related_collection: "pereslavl_cards",
+    meta: {
+      many_collection: "pereslavl_cards_files",
+      many_field: "pereslavl_cards_id",
+      one_collection: "pereslavl_cards",
+      one_field: "images_files",
+      junction_field: "directus_files_id",
+      sort_field: "sort",
+      one_deselect_action: "nullify",
+    },
+  });
+
+  await ensureRelation(token, {
+    collection: "pereslavl_cards_files",
+    field: "directus_files_id",
+    related_collection: "directus_files",
+    meta: {
+      many_collection: "pereslavl_cards_files",
+      many_field: "directus_files_id",
+      one_collection: "directus_files",
+      one_field: null,
+      junction_field: "pereslavl_cards_id",
+      sort_field: "sort",
+      one_deselect_action: "nullify",
+    },
+  });
+}
+
 async function ensurePereslavlCardsFields(token) {
   await ensureField(token, "pereslavl_cards", {
     field: "page_slug",
@@ -281,20 +410,6 @@ async function ensurePereslavlCardsFields(token) {
   });
 
   await ensureField(token, "pereslavl_cards", {
-    field: "images_files",
-    type: "json",
-    meta: {
-      interface: "files",
-      width: "full",
-      sort: 6,
-      note: "Main image set. Supports multiple files from File Library.",
-    },
-    schema: {
-      is_nullable: true,
-    },
-  });
-
-  await ensureField(token, "pereslavl_cards", {
     field: "images_json",
     type: "json",
     meta: {
@@ -325,6 +440,8 @@ async function ensurePereslavlCardsFields(token) {
       is_nullable: true,
     },
   });
+
+  await ensurePereslavlCardFilesRelation(token);
 
   await patchFieldMetaIfExists(token, "pereslavl_cards", "image_1", {
     hidden: true,
