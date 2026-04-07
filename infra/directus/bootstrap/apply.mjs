@@ -84,43 +84,6 @@ async function fieldExists(token, collection, field) {
   return response.ok;
 }
 
-async function relationExists(token, manyCollection, manyField) {
-  const response = await request(
-    "GET",
-    `/relations?filter[many_collection][_eq]=${encodeURIComponent(
-      manyCollection,
-    )}&filter[many_field][_eq]=${encodeURIComponent(manyField)}&limit=1`,
-    undefined,
-    token,
-  );
-  return (response.data?.length ?? 0) > 0;
-}
-
-async function ensureRelation(token, payload) {
-  const exists = await relationExists(
-    token,
-    payload.collection_many,
-    payload.field_many,
-  );
-  if (exists) {
-    console.log(
-      `Relation '${payload.collection_many}.${payload.field_many}' already exists.`,
-    );
-    return;
-  }
-
-  try {
-    await request("POST", "/relations", payload, token);
-    console.log(
-      `Relation '${payload.collection_many}.${payload.field_many}' created.`,
-    );
-  } catch (error) {
-    console.warn(
-      `Skipping relation '${payload.collection_many}.${payload.field_many}': ${error.message}`,
-    );
-  }
-}
-
 async function ensureField(token, collection, payload) {
   const exists = await fieldExists(token, collection, payload.field);
   if (exists) {
@@ -129,6 +92,21 @@ async function ensureField(token, collection, payload) {
   }
   await request("POST", `/fields/${collection}`, payload, token);
   console.log(`Field '${collection}.${payload.field}' created.`);
+}
+
+async function patchFieldMetaIfExists(token, collection, field, metaPatch) {
+  const exists = await fieldExists(token, collection, field);
+  if (!exists) return;
+
+  await request(
+    "PATCH",
+    `/fields/${collection}/${field}`,
+    {
+      meta: metaPatch,
+    },
+    token,
+  );
+  console.log(`Field '${collection}.${field}' metadata updated.`);
 }
 
 async function ensurePagesFields(token) {
@@ -303,45 +281,16 @@ async function ensurePereslavlCardsFields(token) {
   });
 
   await ensureField(token, "pereslavl_cards", {
-    field: "image_1",
-    type: "uuid",
+    field: "images_files",
+    type: "alias",
     meta: {
-      interface: "file-image",
-      width: "third",
+      special: ["m2m"],
+      interface: "files",
+      width: "full",
       sort: 6,
-      note: "Primary image from File Library.",
+      note: "Main image set. Supports multiple files from File Library.",
     },
-    schema: {
-      is_nullable: true,
-    },
-  });
-
-  await ensureField(token, "pereslavl_cards", {
-    field: "image_2",
-    type: "uuid",
-    meta: {
-      interface: "file-image",
-      width: "third",
-      sort: 7,
-      note: "Secondary image from File Library.",
-    },
-    schema: {
-      is_nullable: true,
-    },
-  });
-
-  await ensureField(token, "pereslavl_cards", {
-    field: "image_3",
-    type: "uuid",
-    meta: {
-      interface: "file-image",
-      width: "third",
-      sort: 8,
-      note: "Third image from File Library.",
-    },
-    schema: {
-      is_nullable: true,
-    },
+    schema: null,
   });
 
   await ensureField(token, "pereslavl_cards", {
@@ -354,7 +303,7 @@ async function ensurePereslavlCardsFields(token) {
         template: "[]",
       },
       width: "full",
-      sort: 9,
+      sort: 7,
       note: "Legacy fallback image array. Can stay empty.",
     },
     schema: {
@@ -368,7 +317,7 @@ async function ensurePereslavlCardsFields(token) {
     meta: {
       interface: "input",
       width: "half",
-      sort: 10,
+      sort: 8,
       note: "Card order. Chess layout is derived from this order.",
     },
     schema: {
@@ -376,28 +325,23 @@ async function ensurePereslavlCardsFields(token) {
     },
   });
 
-  await ensureRelation(token, {
-    collection_many: "pereslavl_cards",
-    field_many: "image_1",
-    collection_one: "directus_files",
-    field_one: null,
-    junction_field: null,
+  await patchFieldMetaIfExists(token, "pereslavl_cards", "image_1", {
+    hidden: true,
+    readonly: true,
+    note: "Deprecated. Use images_files.",
+    sort: 90,
   });
-
-  await ensureRelation(token, {
-    collection_many: "pereslavl_cards",
-    field_many: "image_2",
-    collection_one: "directus_files",
-    field_one: null,
-    junction_field: null,
+  await patchFieldMetaIfExists(token, "pereslavl_cards", "image_2", {
+    hidden: true,
+    readonly: true,
+    note: "Deprecated. Use images_files.",
+    sort: 91,
   });
-
-  await ensureRelation(token, {
-    collection_many: "pereslavl_cards",
-    field_many: "image_3",
-    collection_one: "directus_files",
-    field_one: null,
-    junction_field: null,
+  await patchFieldMetaIfExists(token, "pereslavl_cards", "image_3", {
+    hidden: true,
+    readonly: true,
+    note: "Deprecated. Use images_files.",
+    sort: 92,
   });
 }
 

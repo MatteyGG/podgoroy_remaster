@@ -13,6 +13,7 @@ type DirectusCardItem = {
   title?: string;
   body_text?: string;
   tags_text?: string;
+  images_files?: unknown;
   image_1?: unknown;
   image_2?: unknown;
   image_3?: unknown;
@@ -35,6 +36,24 @@ function extractFileId(value: unknown): string | null {
 
 function toAssetUrl(fileId: string, directusPublicUrl: string): string {
   return `${directusPublicUrl.replace(/\/+$/, "")}/assets/${fileId}`;
+}
+
+function extractImageIdsFromFilesField(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .map((item) => {
+      if (typeof item === "string") return item;
+      if (!item || typeof item !== "object") return null;
+
+      const junctionFileId = extractFileId(
+        (item as { directus_files_id?: unknown }).directus_files_id,
+      );
+      if (junctionFileId) return junctionFileId;
+
+      return extractFileId(item);
+    })
+    .filter(Boolean) as string[];
 }
 
 function normalizeContent(raw: unknown): PereslavlPageContent | null {
@@ -69,9 +88,11 @@ function normalizeCards(
         .split(/\n|,/g)
         .map((line) => line.trim())
         .filter(Boolean);
-      const imageIds = [card.image_1, card.image_2, card.image_3]
+      const multiImageIds = extractImageIdsFromFilesField(card.images_files);
+      const singleImageIds = [card.image_1, card.image_2, card.image_3]
         .map(extractFileId)
         .filter(Boolean) as string[];
+      const imageIds = [...multiImageIds, ...singleImageIds];
       const fileImages =
         directusPublicUrl && imageIds.length > 0
           ? imageIds.map((id) => toAssetUrl(id, directusPublicUrl))
@@ -114,7 +135,7 @@ export async function getPereslavlContent(): Promise<PereslavlContentResponse> {
     const cardsEndpoint =
       `${url.replace(/\/+$/, "")}/items/pereslavl_cards` +
       "?filter[page_slug][_eq]=pereslavl&sort=sort" +
-      "&fields=section_id,title,body_text,tags_text,image_1,image_2,image_3,images_json,sort";
+      "&fields=section_id,title,body_text,tags_text,images_files,images_files.directus_files_id,image_1,image_2,image_3,images_json,sort";
 
     const [pageResponse, cardsResponse] = await Promise.all([
       fetch(pageEndpoint, {
