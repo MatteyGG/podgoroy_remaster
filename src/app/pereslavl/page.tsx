@@ -1,8 +1,8 @@
 "use client"
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import { motion, useInView, Variants } from "framer-motion";
+import { useEffect, useState } from "react";
+import { motion, Variants } from "framer-motion";
 import Slider from "../components/slider";
 
 // Reusing your optimized animated components
@@ -111,22 +111,7 @@ const FloatingSlider = ({
 };
 
 export default function AboutPereslavl() {
-  const [activeSection, setActiveSection] = useState('history');
   
-  useEffect(() => {
-    const sections = document.querySelectorAll('section[id]');
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.3) {
-          setActiveSection(entry.target.id);
-        }
-      });
-    }, { threshold: [0.1, 0.3, 0.5] });
-
-    sections.forEach(section => observer.observe(section));
-    
-    return () => sections.forEach(section => observer.unobserve(section));
-  }, []);
 
   useEffect(() => {
     const hash = window.location.hash.substring(1);
@@ -177,7 +162,7 @@ export default function AboutPereslavl() {
               </p>
               <p className="mb-4 text-gray-700 leading-relaxed">
                 Именно здесь родился и был крещен великий полководец Александр Невский , 
-                а позднее молодой Петр I создал на Плещеевом озере свою "потешную флотилию", 
+                а позднее молодой Петр I создал на Плещеевом озере свою &quot;потешную флотилию&quot;, 
                 положившую начало российскому военному флоту.
               </p>
               <div className="mt-6">
@@ -190,8 +175,8 @@ export default function AboutPereslavl() {
                     Спасо-Преображенский собор
                   </span>
                   <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                    Музей-усадьба "Ботик Петра I"
-                  </span>``
+                    Музей-усадьба &quot;Ботик Петра I&quot;
+                  </span>
                   <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
                     Красная площадь
                   </span>
@@ -276,7 +261,7 @@ export default function AboutPereslavl() {
             <div className="prose prose-lg max-w-none">
               <h2 className="text-2xl font-semibold mb-4">Уникальные музеи</h2>
               <p className="mb-4 text-gray-700 leading-relaxed">
-                Переславль называют "столицей музеев" - здесь находится множество частных коллекций 
+                Переславль называют &quot;столицей музеев&quot; - здесь находится множество частных коллекций 
                 и тематических музеев, которые не оставят равнодушными ни детей, ни взрослых 10].
               </p>
               <p className="mb-4 text-gray-700 leading-relaxed">
@@ -354,7 +339,7 @@ export default function AboutPereslavl() {
               />
               <Image
                 className="slider_image"
-                src="/images/pereslavl/nature2.jpg" alt="Виндсерфинг на озере" height={1000} width={1000} priority={true}
+                src="/images/pereslavl/nature2.png" alt="Виндсерфинг на озере" height={1000} width={1000} priority={true}
               />
               <Image
                 className="slider_image"
@@ -381,7 +366,7 @@ export default function AboutPereslavl() {
                 <div className="bg-white p-6 rounded-xl shadow-sm">
                   <h3 className="font-semibold mb-2">Как добраться</h3>
                   <p className="text-sm text-gray-600">
-                    На автомобиле: по трассе М8 "Холмогоры" (2,5 часа из Москвы) <br/>
+                    На автомобиле: по трассе М8 &quot;Холмогоры&quot; (2,5 часа из Москвы) <br/>
                     На автобусе: от Центрального автовокзала Москвы <br/>
                     На поезде: до станции Берендеево, затем на автобусе 
                   </p>

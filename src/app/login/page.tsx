@@ -1,3 +1,5 @@
+"use client";
+
 export default function Login() {
     return (
         <section className="mt-8 lg:mx-40">

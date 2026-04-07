@@ -1,5 +1,5 @@
 import React from 'react';
-import { scrollToDataNav, ScrollHandler } from '@/utils/scrollUtils';
+import { scrollToDataNav } from '@/utils/scrollUtils';
 
 interface ScrollButtonProps {
   navId: string;

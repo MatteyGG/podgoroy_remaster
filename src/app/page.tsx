@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Slider from "./components/slider";
-import { useEffect, useRef, useState } from "react";
-import { motion, useInView, Variants } from "framer-motion";
+import { useEffect, useState } from "react";
+import { motion, Variants } from "framer-motion";
 
 // Оптимизированные анимированные компоненты
 const AnimatedSection = ({
@@ -129,24 +129,6 @@ const FloatingSlider = ({
 // );
 
 export default function Home() {
-  const [activeSection, setActiveSection] = useState('section-1');
-  
-  // Intersection Observer для отслеживания активной секции
-  useEffect(() => {
-    const sections = document.querySelectorAll('section[id]');
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.3) {
-          setActiveSection(entry.target.id);
-        }
-      });
-    }, { threshold: [0.1, 0.3, 0.5] });
-
-    sections.forEach(section => observer.observe(section));
-    
-    return () => sections.forEach(section => observer.unobserve(section));
-  }, []);
-
   // Обработка хеша при загрузке
   useEffect(() => {
     const hash = window.location.hash.substring(1);
@@ -190,7 +172,7 @@ export default function Home() {
             <div className="prose prose-lg max-w-none">
               <h2 className="text-2xl font-semibold mb-4">Ваш уютный дом вдали от дома</h2>
               <p className="mb-4 text-gray-700 leading-relaxed">
-                Подгорой расположен в самом сердце "столицы музеев". Насладитесь видом на 
+                Подгорой расположен в самом сердце &quot;столицы музеев&quot;. Насладитесь видом на 
                 монастырь и вольным ветром в виндсерфинг-клубе в 5 минутах езды.
               </p>
               <p className="mb-4 text-gray-700 leading-relaxed">

@@ -4,7 +4,7 @@ import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
 
 export default function Slider({ children }: { children: ReactNode }) {
-    const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true }, [Autoplay({
+    const [emblaRef] = useEmblaCarousel({ loop: true }, [Autoplay({
         delay: 6000,
     })])
 
