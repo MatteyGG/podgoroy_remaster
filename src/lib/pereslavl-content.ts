@@ -24,7 +24,7 @@ function normalizeContent(raw: unknown): PereslavlPageContent | null {
 }
 
 export async function getPereslavlContent(): Promise<PereslavlContentResponse> {
-  const url = process.env.NEXT_PUBLIC_DIRECTUS_URL;
+  const url = process.env.DIRECTUS_INTERNAL_URL ?? process.env.NEXT_PUBLIC_DIRECTUS_URL;
   const token = process.env.DIRECTUS_STATIC_TOKEN;
 
   if (!url || !token) {
