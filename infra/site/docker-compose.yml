@@ -1,0 +1,14 @@
+name: podgoroy-site
+
+services:
+  podgoroy-remaster-app:
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+    image: podgoroy-remaster:latest
+    container_name: podgoroy-remaster-app
+    restart: unless-stopped
+    env_file:
+      - ../../.env.production
+    ports:
+      - "127.0.0.1:3011:3000"

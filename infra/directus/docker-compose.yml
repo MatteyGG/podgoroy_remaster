@@ -6,7 +6,7 @@ services:
     container_name: podgoroy-cms-db
     restart: unless-stopped
     env_file:
-      - .env
+      - .env.production
     environment:
       POSTGRES_DB: ${DIRECTUS_DB_DATABASE}
       POSTGRES_USER: ${DIRECTUS_DB_USER}
@@ -42,7 +42,7 @@ services:
       podgoroy-cms-redis:
         condition: service_healthy
     env_file:
-      - .env
+      - .env.production
     environment:
       KEY: ${DIRECTUS_KEY}
       SECRET: ${DIRECTUS_SECRET}

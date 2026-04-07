@@ -29,6 +29,13 @@ docker compose --env-file .env.production up -d
 docker compose ps
 ```
 
+For regular updates/restarts:
+
+```bash
+docker compose --env-file .env.production up -d
+docker compose restart
+```
+
 Directus will be available on `127.0.0.1:${DIRECTUS_PORT}`.
 
 If you still need a local dev profile, you can keep `.env.example` and run with that file.
@@ -63,3 +70,16 @@ curl "http://127.0.0.1:8055/items/pages?filter[slug][_eq]=pereslavl&limit=1"
 
 Proxy your CMS admin internally (for example, `cms.podgoroy.stasis-wp.ru`) to `127.0.0.1:8055`.
 Keep Directus bound to localhost unless public access is intentionally needed.
+
+## Site App Compose (VPS)
+
+The main Next.js site can be managed via:
+
+`infra/site/docker-compose.yml`
+
+From project root:
+
+```bash
+docker compose -f infra/site/docker-compose.yml up -d --build
+docker compose -f infra/site/docker-compose.yml restart
+```
