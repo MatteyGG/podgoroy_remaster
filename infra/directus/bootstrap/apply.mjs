@@ -54,10 +54,10 @@ async function hasCollection(token, name) {
   return response.ok;
 }
 
-async function ensureCollection(token) {
-  const exists = await hasCollection(token, "pages");
+async function ensureCollection(token, name, meta) {
+  const exists = await hasCollection(token, name);
   if (exists) {
-    console.log("Collection 'pages' already exists.");
+    console.log(`Collection '${name}' already exists.`);
     return;
   }
 
@@ -65,19 +65,16 @@ async function ensureCollection(token) {
     "POST",
     "/collections",
     {
-      collection: "pages",
-      meta: {
-        icon: "article",
-        note: "Site pages managed as content JSON.",
-      },
+      collection: name,
+      meta,
       schema: {
-        name: "pages",
+        name,
       },
     },
     token,
   );
 
-  console.log("Collection 'pages' created.");
+  console.log(`Collection '${name}' created.`);
 }
 
 async function fieldExists(token, collection, field) {
@@ -87,18 +84,18 @@ async function fieldExists(token, collection, field) {
   return response.ok;
 }
 
-async function ensureField(token, payload) {
-  const exists = await fieldExists(token, "pages", payload.field);
+async function ensureField(token, collection, payload) {
+  const exists = await fieldExists(token, collection, payload.field);
   if (exists) {
-    console.log(`Field 'pages.${payload.field}' already exists.`);
+    console.log(`Field '${collection}.${payload.field}' already exists.`);
     return;
   }
-  await request("POST", "/fields/pages", payload, token);
-  console.log(`Field 'pages.${payload.field}' created.`);
+  await request("POST", `/fields/${collection}`, payload, token);
+  console.log(`Field '${collection}.${payload.field}' created.`);
 }
 
-async function ensureFields(token) {
-  await ensureField(token, {
+async function ensurePagesFields(token) {
+  await ensureField(token, "pages", {
     field: "slug",
     type: "string",
     meta: {
@@ -115,7 +112,7 @@ async function ensureFields(token) {
     },
   });
 
-  await ensureField(token, {
+  await ensureField(token, "pages", {
     field: "title",
     type: "string",
     meta: {
@@ -130,7 +127,7 @@ async function ensureFields(token) {
     },
   });
 
-  await ensureField(token, {
+  await ensureField(token, "pages", {
     field: "meta_title",
     type: "string",
     meta: {
@@ -144,7 +141,7 @@ async function ensureFields(token) {
     },
   });
 
-  await ensureField(token, {
+  await ensureField(token, "pages", {
     field: "meta_description",
     type: "text",
     meta: {
@@ -157,7 +154,7 @@ async function ensureFields(token) {
     },
   });
 
-  await ensureField(token, {
+  await ensureField(token, "pages", {
     field: "sections",
     type: "json",
     meta: {
@@ -174,7 +171,7 @@ async function ensureFields(token) {
     },
   });
 
-  await ensureField(token, {
+  await ensureField(token, "pages", {
     field: "practical_info",
     type: "json",
     meta: {
@@ -185,6 +182,115 @@ async function ensureFields(token) {
       },
       width: "full",
       sort: 6,
+    },
+    schema: {
+      is_nullable: true,
+    },
+  });
+}
+
+async function ensurePereslavlCardsFields(token) {
+  await ensureField(token, "pereslavl_cards", {
+    field: "page_slug",
+    type: "string",
+    meta: {
+      interface: "input",
+      width: "half",
+      required: true,
+      sort: 1,
+      note: "Page slug. Keep 'pereslavl' for this page.",
+    },
+    schema: {
+      is_nullable: false,
+      max_length: 255,
+    },
+  });
+
+  await ensureField(token, "pereslavl_cards", {
+    field: "section_id",
+    type: "string",
+    meta: {
+      interface: "input",
+      width: "half",
+      required: true,
+      sort: 2,
+      note: "Anchor id, example: history, museums.",
+    },
+    schema: {
+      is_nullable: false,
+      max_length: 255,
+    },
+  });
+
+  await ensureField(token, "pereslavl_cards", {
+    field: "title",
+    type: "string",
+    meta: {
+      interface: "input",
+      width: "full",
+      required: true,
+      sort: 3,
+    },
+    schema: {
+      is_nullable: false,
+      max_length: 255,
+    },
+  });
+
+  await ensureField(token, "pereslavl_cards", {
+    field: "body_text",
+    type: "text",
+    meta: {
+      interface: "input-multiline",
+      width: "full",
+      sort: 4,
+      note: "Paragraph generator: separate paragraphs with an empty line.",
+    },
+    schema: {
+      is_nullable: true,
+    },
+  });
+
+  await ensureField(token, "pereslavl_cards", {
+    field: "tags_text",
+    type: "text",
+    meta: {
+      interface: "input-multiline",
+      width: "full",
+      sort: 5,
+      note: "One tag per line.",
+    },
+    schema: {
+      is_nullable: true,
+    },
+  });
+
+  await ensureField(token, "pereslavl_cards", {
+    field: "images_json",
+    type: "json",
+    meta: {
+      interface: "input-code",
+      options: {
+        language: "json",
+        template: "[]",
+      },
+      width: "full",
+      sort: 6,
+      note: "Array of image URLs or /assets/<file_id> links.",
+    },
+    schema: {
+      is_nullable: true,
+    },
+  });
+
+  await ensureField(token, "pereslavl_cards", {
+    field: "sort",
+    type: "integer",
+    meta: {
+      interface: "input",
+      width: "half",
+      sort: 7,
+      note: "Card order. Chess layout is derived from this order.",
     },
     schema: {
       is_nullable: true,
@@ -215,11 +321,59 @@ async function upsertPereslavlPage(token) {
   console.log("Inserted page 'pereslavl'.");
 }
 
+async function seedPereslavlCards(token) {
+  const contentRaw = await fs.readFile(contentPath, "utf8");
+  const content = JSON.parse(contentRaw);
+
+  const existing = await request(
+    "GET",
+    `/items/pereslavl_cards?filter[page_slug][_eq]=${encodeURIComponent(
+      content.slug,
+    )}&limit=1`,
+    undefined,
+    token,
+  );
+
+  if (existing.data?.length > 0) {
+    console.log("Cards for 'pereslavl' already exist.");
+    return;
+  }
+
+  for (let i = 0; i < content.sections.length; i += 1) {
+    const section = content.sections[i];
+    await request(
+      "POST",
+      "/items/pereslavl_cards",
+      {
+        page_slug: content.slug,
+        section_id: section.id,
+        title: section.title,
+        body_text: (section.body ?? []).join("\n\n"),
+        tags_text: (section.tags ?? []).join("\n"),
+        images_json: section.images ?? [],
+        sort: i + 1,
+      },
+      token,
+    );
+  }
+
+  console.log("Seeded pereslavl cards from default content.");
+}
+
 async function main() {
   const token = await login();
-  await ensureCollection(token);
-  await ensureFields(token);
+  await ensureCollection(token, "pages", {
+    icon: "article",
+    note: "Site pages managed as content JSON.",
+  });
+  await ensureCollection(token, "pereslavl_cards", {
+    icon: "view_agenda",
+    note: "Section cards for /pereslavl page editor.",
+  });
+  await ensurePagesFields(token);
+  await ensurePereslavlCardsFields(token);
   await upsertPereslavlPage(token);
+  await seedPereslavlCards(token);
   console.log("Directus bootstrap completed.");
 }
 
