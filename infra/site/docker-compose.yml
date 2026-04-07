@@ -11,8 +11,15 @@ services:
     env_file:
       - ../../.env.production
     environment:
-      DIRECTUS_INTERNAL_URL: ${DIRECTUS_INTERNAL_URL:-http://host.docker.internal:8055}
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      DIRECTUS_INTERNAL_URL: ${DIRECTUS_INTERNAL_URL:-http://podgoroy-cms-app:8055}
     ports:
       - "127.0.0.1:3011:3000"
+    networks:
+      - default
+      - cms
+
+networks:
+  default:
+  cms:
+    external: true
+    name: podgoroy-cms_default
