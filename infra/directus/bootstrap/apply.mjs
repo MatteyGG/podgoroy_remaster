@@ -282,15 +282,16 @@ async function ensurePereslavlCardsFields(token) {
 
   await ensureField(token, "pereslavl_cards", {
     field: "images_files",
-    type: "alias",
+    type: "json",
     meta: {
-      special: ["m2m"],
       interface: "files",
       width: "full",
       sort: 6,
       note: "Main image set. Supports multiple files from File Library.",
     },
-    schema: null,
+    schema: {
+      is_nullable: true,
+    },
   });
 
   await ensureField(token, "pereslavl_cards", {
