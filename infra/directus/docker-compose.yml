@@ -1,0 +1,76 @@
+name: podgoroy-cms
+
+services:
+  podgoroy-cms-db:
+    image: postgres:16-alpine
+    container_name: podgoroy-cms-db
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${DIRECTUS_DB_DATABASE}
+      POSTGRES_USER: ${DIRECTUS_DB_USER}
+      POSTGRES_PASSWORD: ${DIRECTUS_DB_PASSWORD}
+    volumes:
+      - podgoroy_cms_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DIRECTUS_DB_USER} -d ${DIRECTUS_DB_DATABASE}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  podgoroy-cms-redis:
+    image: redis:7-alpine
+    container_name: podgoroy-cms-redis
+    restart: unless-stopped
+    command: ["redis-server", "--save", "60", "1", "--loglevel", "warning"]
+    volumes:
+      - podgoroy_cms_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  podgoroy-cms-app:
+    image: directus/directus:11.1.2
+    container_name: podgoroy-cms-app
+    restart: unless-stopped
+    depends_on:
+      podgoroy-cms-db:
+        condition: service_healthy
+      podgoroy-cms-redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      KEY: ${DIRECTUS_KEY}
+      SECRET: ${DIRECTUS_SECRET}
+      ADMIN_EMAIL: ${DIRECTUS_ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${DIRECTUS_ADMIN_PASSWORD}
+      DB_CLIENT: pg
+      DB_HOST: podgoroy-cms-db
+      DB_PORT: 5432
+      DB_DATABASE: ${DIRECTUS_DB_DATABASE}
+      DB_USER: ${DIRECTUS_DB_USER}
+      DB_PASSWORD: ${DIRECTUS_DB_PASSWORD}
+      CACHE_ENABLED: true
+      CACHE_STORE: redis
+      REDIS_HOST: podgoroy-cms-redis
+      REDIS_PORT: 6379
+      PUBLIC_URL: ${DIRECTUS_PUBLIC_URL}
+      CORS_ENABLED: true
+      CORS_ORIGIN: ${DIRECTUS_CORS_ORIGIN}
+    ports:
+      - "127.0.0.1:${DIRECTUS_PORT:-8055}:8055"
+    volumes:
+      - podgoroy_cms_uploads:/directus/uploads
+      - ./extensions:/directus/extensions
+
+volumes:
+  podgoroy_cms_db_data:
+    name: podgoroy-cms-db-data
+  podgoroy_cms_redis_data:
+    name: podgoroy-cms-redis-data
+  podgoroy_cms_uploads:
+    name: podgoroy-cms-uploads
