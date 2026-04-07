@@ -10,10 +10,10 @@ This setup gives a clean self-hosted CMS stack with predictable container names:
 
 ```bash
 cd infra/directus
-cp .env.example .env
+cp env.production.example .env.production
 ```
 
-Edit `.env` and set strong values for:
+Edit `.env.production` and set strong values for:
 
 - `DIRECTUS_KEY`
 - `DIRECTUS_SECRET`
@@ -25,11 +25,13 @@ Edit `.env` and set strong values for:
 ## 2) Start CMS
 
 ```bash
-docker compose --env-file .env up -d
+docker compose --env-file .env.production up -d
 docker compose ps
 ```
 
 Directus will be available on `127.0.0.1:${DIRECTUS_PORT}`.
+
+If you still need a local dev profile, you can keep `.env.example` and run with that file.
 
 ## 3) Apply Content Model + Seed `/pereslavl`
 

@@ -12,10 +12,15 @@ declare global {
 
 export default function Booking() {
   useEffect(() => {
+    const widgetToken = process.env.NEXT_PUBLIC_HOMERESERVE_TOKEN;
+    if (!widgetToken) {
+      return;
+    }
+
     const scriptId = "homereserve-widget-script";
     const initWidget = () => {
       window.homereserve?.initWidgetList({
-        token: "S7kbh9F5Na",
+        token: widgetToken,
         tag: "web",
       });
     };
@@ -41,6 +46,11 @@ export default function Booking() {
   return (
     <section className="mx-auto max-w-6xl px-4 py-10">
       <h1 className="mb-6 text-3xl font-semibold">Бронирование</h1>
+      {!process.env.NEXT_PUBLIC_HOMERESERVE_TOKEN ? (
+        <p className="mb-4 text-sm text-red-600">
+          Не задан `NEXT_PUBLIC_HOMERESERVE_TOKEN` в env.
+        </p>
+      ) : null}
       <div id="hr-widget" />
     </section>
   );
