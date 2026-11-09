@@ -3,105 +3,53 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #f3f3f3;
-  --foreground: #171717;
+  --surface: #ffffff;
+  --surface-subtle: #f4f6f8;
+  --text: #17211b;
+  --muted: #4b5563;
+  --accent: #1d4ed8;
+  --accent-hover: #1e40af;
+  --button-text: #ffffff;
+  --border: #d9e0e7;
 }
 
+.dark {
+  --surface: #0f1214;
+  --surface-subtle: #181e22;
+  --text: #f3f4f6;
+  --muted: #c0c7d1;
+  --accent: #93c5fd;
+  --accent-hover: #bfdbfe;
+  --button-text: #0f172a;
+  --border: #374151;
+}
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-@theme dark {
-  --color-background: var(--background);
-  --color-foreground: white;
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-@theme light {
-  --color-background: var(--background);
-  --color-foreground: black;
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-* {
-  @apply transition-colors duration-700;
+  --font-sans: var(--font-nunito);
 }
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  overflow-x: clip;
 }
-
-
 
 body {
-  @apply bg-[#ffff] text-[#171717] dark:bg-[#0a0a0a] dark:text-[#ededed]
-
-   
+  margin: 0;
+  overflow-x: hidden;
+  overflow-x: clip;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-nunito), sans-serif;
 }
 
-.embla {  overflow: hidden; }
-.embla__container {  display: flex;}
-.embla__slide {  flex: 0 0 100%;  min-width: 0;  resize: both;  overflow: auto;}
-.embla__viewport {  overflow: hidden;  cursor: move;  cursor: grab;}
-.embla__viewport:active {  cursor: grabbing;}
-
-.slider_image { @apply object-contain h-auto max-w-full  }
-
-
-.first_latter::first-letter {
-  @apply uppercase tracking-widest text-7xl font-bold  float-start
+a, button, summary {
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, opacity 160ms ease;
 }
 
-.menu li:hover {
-  @apply transition ease-in-out hover:scale-110 delay-50 duration-500 
-}
-
-.section {
-  @apply mt-16 text-gray-950 dark:text-white
-}
-
-@layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
-  }
-}
-
-@theme {
-  --shadow-box-shadow-first: 0px 1px 0px var(--shadow-color);
-  --color-button-border-color: var(--border-color);
-  --color-hover-background: var(--hover-background);
-  --color-active-background: var(--active-background);
-}
-
-@layer base {
-  :root {
-    --shadow-color: rgba(55, 53, 47, 0.09);
-    --border-color: rgba(55, 53, 47, 0.09);
-    --hover-background: rgba(55, 53, 47, 0.06);
-    --active-background: rgba(55, 53, 47, 0.16);
-  }
-  .dark {
-    --shadow-color: rgba(255, 255, 255, 0.094);
-    --border-color: rgba(255, 255, 255, 0.094);
-    --hover-background: rgba(255, 255, 255, 0.055);
-    --active-background: rgba(255, 255, 255, 0.03);
-  }
+:where(a, button, summary, input, select):focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
 }
 
 section[id],
@@ -110,20 +58,56 @@ div[id="pereslavl"] {
   scroll-margin-top: 104px;
 }
 
+@layer components {
+  .section-shell {
+    @apply mx-auto w-full max-w-6xl px-5 md:px-8;
+  }
+
+  .section-title {
+    @apply text-3xl md:text-4xl font-semibold tracking-tight text-[var(--text)];
+  }
+
+  .section-eyebrow {
+    @apply mb-3 text-sm font-semibold uppercase tracking-[0.14em] text-[var(--accent)];
+  }
+
+  .body-text {
+    @apply text-base md:text-lg leading-relaxed text-[var(--muted)];
+  }
+
+  .button-primary {
+    @apply inline-flex min-h-11 items-center justify-center rounded-lg bg-[var(--accent)] px-5 py-2.5 text-center font-semibold text-[var(--button-text)] hover:bg-[var(--accent-hover)];
+  }
+
+  .button-secondary {
+    @apply inline-flex min-h-11 items-center justify-center rounded-lg border border-[var(--accent)] px-5 py-2.5 text-center font-semibold text-[var(--accent)] hover:bg-[var(--surface-subtle)];
+  }
+
+  .card-surface {
+    @apply rounded-2xl border border-[var(--border)] bg-[var(--surface-subtle)];
+  }
+
+  .tag {
+    @apply rounded-full border border-[var(--border)] bg-[var(--surface-subtle)] px-3 py-1 text-sm text-[var(--muted)];
+  }
+}
+
+.embla { overflow: hidden; }
+.embla__container { display: flex; }
+.embla__slide { flex: 0 0 100%; min-width: 0; }
+.embla__viewport { overflow: hidden; cursor: grab; }
+.embla__viewport:active { cursor: grabbing; }
+
+.slider_image {
+  @apply aspect-[4/3] h-auto w-full rounded-xl object-cover;
+}
+
+iframe {
+  max-width: 100%;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
-}
-
-
-body {
-  overflow-x: hidden;
-  overflow-x: clip;
-}
-
-
-html {
-  overflow-x: hidden;
-  overflow-x: clip;
 }

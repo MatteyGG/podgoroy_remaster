@@ -9,12 +9,12 @@ export default async function Home() {
   const result = await getPereslavlContent();
 
   return (
-    <>
+    <main>
       <IntroSection />
       <NewsSection />
       <BookingSection />
       <PereslavlSection content={result.data} source={result.source} />
       <ContactsSection />
-    </>
+    </main>
   );
 }

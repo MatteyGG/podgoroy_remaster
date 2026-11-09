@@ -8,9 +8,9 @@ export default function ThemeSwitcher() {
   return (
     <button
       type="button"
-      className="cursor-pointer bg-white dark:bg-[#191919] text-[#37352f] dark:text-[#ffffffcf] hover:bg-hover-background active:bg-active-background rounded-md border border-button-border-color p-1.5 [transition:background_20ms_ease-in,_color_0.15s]"
-      title="Toggle theme"
-      aria-label="Toggle theme"
+      className="cursor-pointer rounded-md border border-[var(--border)] bg-[var(--surface)] p-2 text-[var(--text)] hover:bg-[var(--surface-subtle)]"
+      title="Переключить тему"
+      aria-label="Переключить тему"
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
     >
       <svg

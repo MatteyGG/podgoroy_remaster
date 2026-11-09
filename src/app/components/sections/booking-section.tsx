@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { SITE_CONTACTS } from "@/content/site";
 
 declare global {
   interface Window {
@@ -36,12 +37,23 @@ export default function BookingSection() {
   }, []);
 
   return (
-    <section id="booking" className="mx-auto max-w-6xl px-4 py-10">
-      <h1 className="mb-6 text-3xl font-semibold">Бронирование</h1>
-      {!process.env.NEXT_PUBLIC_HOMERESERVE_TOKEN ? (
-        <p className="mb-4 text-sm text-red-600">Не задан `NEXT_PUBLIC_HOMERESERVE_TOKEN` в env.</p>
-      ) : null}
-      <div id="hr-widget" />
+    <section id="booking" className="py-16 md:py-24">
+      <div className="section-shell">
+        <div className="mb-8 max-w-2xl">
+          <p className="section-eyebrow">Бронирование</p>
+          <h2 className="section-title">Выберите даты отдыха</h2>
+          <p className="body-text mt-4">Проверьте свободные даты в виджете или уточните детали по телефону.</p>
+        </div>
+        {process.env.NEXT_PUBLIC_HOMERESERVE_TOKEN ? (
+          <div id="hr-widget" />
+        ) : (
+          <div className="card-surface max-w-2xl p-6 md:p-8">
+            <h3 className="mb-3 text-xl font-semibold">Забронировать по телефону</h3>
+            <p className="body-text mb-5">Онлайн-календарь сейчас недоступен. Позвоните, и мы подскажем свободные даты и ответим на вопросы.</p>
+            <a className="button-primary" href={SITE_CONTACTS.phoneHref}>{SITE_CONTACTS.phoneDisplay}</a>
+          </div>
+        )}
+      </div>
     </section>
   );
 }
