@@ -103,3 +103,27 @@ body {
     --active-background: rgba(255, 255, 255, 0.03);
   }
 }
+
+section[id],
+div[id="home"],
+div[id="pereslavl"] {
+  scroll-margin-top: 104px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+
+body {
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+
+html {
+  overflow-x: hidden;
+  overflow-x: clip;
+}
