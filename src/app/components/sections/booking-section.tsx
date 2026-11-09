@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { SITE_CONTACTS } from "@/content/site";
 
 declare global {
@@ -12,32 +12,50 @@ declare global {
 }
 
 export default function BookingSection() {
+  const sectionRef = useRef<HTMLElement>(null);
+
   useEffect(() => {
     const widgetToken = process.env.NEXT_PUBLIC_HOMERESERVE_TOKEN;
-    if (!widgetToken) return;
+    const section = sectionRef.current;
+    if (!widgetToken || !section) return;
 
-    const scriptId = "homereserve-widget-script";
-    const initWidget = () => {
-      window.homereserve?.initWidgetList({ token: widgetToken, tag: "web" });
+    const loadWidget = () => {
+      const scriptId = "homereserve-widget-script";
+      const initWidget = () => {
+        window.homereserve?.initWidgetList({ token: widgetToken, tag: "web" });
+      };
+      const existing = document.getElementById(scriptId) as HTMLScriptElement | null;
+      if (existing) {
+        if (window.homereserve) initWidget();
+        else existing.addEventListener("load", initWidget, { once: true });
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.id = scriptId;
+      script.type = "module";
+      script.src = "https://homereserve.ru/widget.js";
+      script.onload = initWidget;
+      document.body.appendChild(script);
     };
 
-    const existing = document.getElementById(scriptId) as HTMLScriptElement | null;
-    if (existing) {
-      if (window.homereserve) initWidget();
-      else existing.addEventListener("load", initWidget, { once: true });
+    if (!("IntersectionObserver" in window)) {
+      loadWidget();
       return;
     }
 
-    const script = document.createElement("script");
-    script.id = scriptId;
-    script.type = "module";
-    script.src = "https://homereserve.ru/widget.js";
-    script.onload = initWidget;
-    document.body.appendChild(script);
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      loadWidget();
+      observer.disconnect();
+    }, { rootMargin: "300px" });
+
+    observer.observe(section);
+    return () => observer.disconnect();
   }, []);
 
   return (
-    <section id="booking" className="py-16 md:py-24">
+    <section id="booking" ref={sectionRef} className="py-16 md:py-24">
       <div className="section-shell">
         <div className="mb-8 max-w-2xl">
           <p className="section-eyebrow">Бронирование</p>

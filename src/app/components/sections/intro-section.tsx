@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { motion, Variants } from "framer-motion";
+import { motion, useReducedMotion, Variants } from "framer-motion";
 import Slider from "@/app/components/slider";
+import AnimatedSliderFrame from "@/app/components/animated-slider-frame";
 import { SITE_CONTACTS } from "@/content/site";
 import { navigateToSection } from "@/utils/scrollUtils";
 
@@ -12,51 +12,16 @@ const AnimatedSection = ({ children, direction = "left", delay = 0.1 }: {
   direction?: "left" | "right" | "up";
   delay?: number;
 }) => {
+  const reducedMotion = useReducedMotion();
   const variants: Variants = {
-    hidden: { opacity: 0, x: direction === "left" ? -32 : direction === "right" ? 32 : 0, y: direction === "up" ? 32 : 0 },
-    visible: { opacity: 1, x: 0, y: 0, transition: { duration: 0.6, delay, ease: "easeOut" } },
+    hidden: { opacity: reducedMotion ? 1 : 0, x: reducedMotion ? 0 : direction === "left" ? -32 : direction === "right" ? 32 : 0, y: reducedMotion ? 0 : direction === "up" ? 32 : 0 },
+    visible: { opacity: 1, x: 0, y: 0, transition: { duration: reducedMotion ? 0 : 0.6, delay, ease: "easeOut" } },
   };
 
   return (
     <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-10% 0px" }} variants={variants}>
       {children}
     </motion.div>
-  );
-};
-
-const FloatingSlider = ({ children, direction = "left" }: {
-  children: React.ReactNode;
-  direction?: "left" | "right";
-}) => {
-  const [reducedMotion, setReducedMotion] = useState(false);
-
-  useEffect(() => {
-    setReducedMotion(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
-  }, []);
-
-  const variants: Variants = {
-    hidden: { opacity: reducedMotion ? 1 : 0, x: reducedMotion ? 0 : direction === "right" ? "20%" : "-20%", scale: reducedMotion ? 1 : 0.97 },
-    visible: { opacity: 1, x: 0, scale: 1, transition: { duration: 0.7, ease: "easeOut" } },
-  };
-
-  return (
-    <div className="relative">
-      <motion.div
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: "-10% 0px" }}
-        variants={variants}
-        className="relative z-10 overflow-hidden rounded-2xl shadow-lg"
-      >
-        {children}
-      </motion.div>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.97 }}
-        whileInView={{ opacity: 0.18, scale: 0.99 }}
-        transition={{ duration: 0.7 }}
-        className="absolute inset-0 z-0 rounded-2xl bg-black blur-lg"
-      />
-    </div>
   );
 };
 
@@ -79,9 +44,9 @@ export default function IntroSection() {
         </h1>
 
         <section id="section-1" className="grid items-center gap-10 py-10 md:grid-cols-2 md:gap-14 md:py-16">
-          <FloatingSlider direction="left">
+          <AnimatedSliderFrame direction="left" arched>
             <SliderImages paths={["/images/slider/1.jpg", "/images/slider/2.jpg", "/images/slider/3.jpg"]} alt="Плещеево озеро и интерьер гостевого дома" priority />
-          </FloatingSlider>
+          </AnimatedSliderFrame>
           <AnimatedSection direction="right">
             <div>
               <h2 className="section-title mb-5">Ваш уютный дом вдали от дома</h2>
@@ -108,15 +73,15 @@ export default function IntroSection() {
               </ul>
             </div>
           </AnimatedSection>
-          <FloatingSlider direction="right">
+          <AnimatedSliderFrame direction="right">
             <SliderImages paths={["/images/slider/4.jpg", "/images/slider/5.jpg"]} alt="Деревянная кухня и жилое пространство дома" />
-          </FloatingSlider>
+          </AnimatedSliderFrame>
         </section>
 
         <section id="section-3" className="grid items-center gap-10 py-10 md:grid-cols-2 md:gap-14 md:py-16">
-          <FloatingSlider direction="left">
+          <AnimatedSliderFrame direction="left">
             <SliderImages paths={["/images/slider/1.jpg", "/images/slider/2.jpg"]} alt="Озеро и места для отдыха рядом с домом" />
-          </FloatingSlider>
+          </AnimatedSliderFrame>
           <AnimatedSection direction="right">
             <div>
               <h2 className="section-title mb-5">Активный отдых</h2>
