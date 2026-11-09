@@ -2,9 +2,9 @@ import type { MouseEvent } from "react";
 import type { SectionId } from "@/content/site";
 
 export function navigateToSection(event: MouseEvent<HTMLAnchorElement>, id: SectionId) {
-  event.preventDefault();
   const target = document.getElementById(id);
   if (!target) return;
+  event.preventDefault();
   window.history.pushState(null, "", `#${id}`);
   window.dispatchEvent(new Event("hashchange"));
   target.scrollIntoView({

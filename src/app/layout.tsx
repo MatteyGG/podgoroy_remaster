@@ -25,6 +25,9 @@ export default function RootLayout({
     <html lang="ru-RU" suppressHydrationWarning>
       <body
         className={`${nunito.variable} antialiased`}>
+        <noscript>
+          <style>{`[style*="opacity:0"]{opacity:1!important;transform:none!important}`}</style>
+        </noscript>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
