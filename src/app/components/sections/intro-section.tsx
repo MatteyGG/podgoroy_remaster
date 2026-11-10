@@ -45,7 +45,14 @@ export default function IntroSection() {
 
         <section id="section-1" className="grid items-center gap-10 py-10 md:grid-cols-2 md:gap-14 md:py-16">
           <AnimatedSliderFrame direction="left" arched>
-            <SliderImages paths={["/images/slider/1.jpg", "/images/slider/2.jpg", "/images/slider/3.jpg"]} alt="Плещеево озеро и интерьер гостевого дома" priority />
+            <Image
+              className="hero_image"
+              src="/images/slider/1.jpg"
+              alt="Общий вид берега Плещеева озера рядом с гостевым домом"
+              height={680}
+              width={914}
+              priority
+            />
           </AnimatedSliderFrame>
           <AnimatedSection direction="right">
             <div>
